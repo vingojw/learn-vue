@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>repeat 传值</title>
+	<script src="js/vue.js"></script>
+</head>
+<body>
+	<a href="http://www.zhihu.com/question/28541533/answer/41230399">知乎：vuejs如何实现嵌套v-repeat的传值?</a>
+
+<ul id="demo">
+    <li v-repeat="kinds:kinds">
+        id:{{kinds.id}}
+        <div v-repeat="list:list | isInParent">
+            <span>{{ list.pid }}{{kinds.id}}</span>
+        </div>
+    </li>
+</ul>
+<script>
+  //大概想实现的效果是，循环 kinds ，然后找list 里面 pid 和 kinds 的id的值一样的数据
+
+  var kinds = [
+      {"id":"1",},
+      {"id":"2",},
+      {"id":"3",},
+      {"id":"4",}
+  ]
+
+  var list = [
+        {"pid":"1",},
+        {"pid":"1",},
+        {"pid":"2",},
+        {"pid":"2",},
+        {"pid":"3",},
+        {"pid":"3",},
+        {"pid":"4",},
+        {"pid":"4",}
+    ]
+
+  Vue.filter('isInParent', function (arr) {
+    var array = []
+    // this 指向当前 vm
+    var pValue = this.kinds.id
+    arr.forEach(
+        function (obj,index) {
+            if (obj.pid == pValue){
+                array.push(arr[index])
+            }
+        }
+    )
+    return array;
+  })
+  var demo = new Vue({
+      el: '#demo',
+      data: {
+          kinds: kinds,
+          list: list
+      }
+  })
+</script>
+</body>
+</html>

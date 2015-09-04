@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/vue.js"></script>
+    <meta charset="UTF-8">
+    <style>
+    .tips{
+        width:50%;
+      padding: 12px 24px 12px 30px;
+      margin: 2em 0;
+      border-left: 4px solid #f66;
+      background-color: #f9f9f9;
+      position: relative;
+      border-top-left-radius: 0px;
+      border-top-right-radius: 0px;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.125);
+    }
+    .tips:before{
+position: absolute;
+  top: 14px;
+  left: -12px;
+  background-color: #f66;
+  color: #fff;
+  content: "!";
+  width: 20px;
+  height: 20px;
+  border-radius: 100%;
+  text-align: center;
+  line-height: 20px;
+  font-weight: bold;
+  font-family: 'Dosis', 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+
+    }
+    </style>
+   </head> 
+<body>
+    <a target="_blank" href="http://cn.vuejs.org/guide/components.html#prop_绑定类型">文档:prop_绑定类型</a>
+
+    <div id="demo">
+    <p>父级：<br/>
+    {{pstr}} --
+    {{pbool}} --
+    {{pnum}} --
+    {{parr}} --
+    {{pobj.o}}</br>
+    </p>
+    <p>子级：(控制台  s.$.chil.$data.属性  访问子级元素)</p>
+      <child pstr="{{pstr}}" v-ref="chil" pbool="{{pbool}}" pnum="{{pnum}}" parr="{{parr}}" pobj="{{pobj}}"></child><a href="#" v-on="click:changChilVal">改变子组件--单向绑定</a> 
+      <br/>
+      <child pstr="{{@pstr}}" v-ref="chil1" pbool="{{@pbool}}" pnum="{{@pnum}}" parr="{{@parr}}" pobj="{{@pobj}}"></child><a href="#" v-on="click:changChilVal1">改变子组件--双向绑定</a>
+      <br/>
+      <child pstr="{{*pstr}}" v-ref="chil2" pbool="{{*pbool}}" pnum="{{*pnum}}" parr="{{*parr}}" pobj="{{*pobj}}"></child> <a href="#" v-on="click:changChilVal2">改变子组件--单次绑定</a>
+      
+    </div>
+
+    <p class="tips">
+        注意如果传递的 prop 值是对象或数组，将会是引用传递。在子级改动对象或数组将会影响到父级的状态，这种情况会无视你使用的绑定的类型。
+       
+    </p>
+    <script>
+        
+        var chil = Vue.component('child',{
+            props:['pstr','pnum','parr','pbool','pobj'],
+            //replace:true,
+            ready:function(){
+                //debugger;
+                //this.onload('message from child!');
+            },
+            template:'<span is-show="{{pbool}}">{{pstr}} -- {{pbool}} -- {{pnum}} -- {{parr}} -- {{pobj.o}} <a v-on="click:change">change</a></span>',
+            methods:{
+                change:function(){
+                    
+                }
+            }
+        });
+
+        var s = new Vue({
+            el:'#demo',
+            data:{
+                pstr:'来自父级字符串',
+                pnum:1,
+                pbool:true,
+                parr:['A','r','r','a','y'],
+                pobj:{o:'obj'}
+            },
+            methods:{
+                changChilVal:changeChilVal,
+                changChilVal1:changeChilVal1,
+                changChilVal2:changeChilVal2
+            }
+        });
+        function changeChilVal(){
+            s.$.chil.$data.pstr = "修改子元素字符串";
+            s.$.chil.$data.pnum = 100;
+            s.$.chil.$data.pbool = false;
+            //单项绑定的时候修改属性是可以的
+            //但是如下操作会不起作用，
+            //s.$.chil.$data.parr = ['a','R','R','A','Y']; 引用类型修改属性
+            //s.$.chil.$data.pobj ＝ {o:'sdf'} 但是 如果是这样直接赋值一个新对象是不行的
+            //应该是在原来的对象修改，而不是新赋值
+            s.$.chil.$data.parr.push('add');
+            s.$.chil.$data.pobj.o  = 'obj-change';
+            
+        }
+        function changeChilVal1(){
+            s.$.chil1.$data.pstr = "修改子元素字符串";
+            s.$.chil1.$data.pnum = 100;
+            s.$.chil1.$data.pbool = false;
+            s.$.chil1.$data.parr.push('add');
+            s.$.chil1.$data.pobj.o  = 'obj-change';//单项绑定的时候修改属性是可以的
+        }
+        function changeChilVal2(){
+            s.$.chil2.$data.pstr = "修改子元素字符串";
+            s.$.chil2.$data.pnum = 100;
+            s.$.chil2.$data.pbool = false;
+            s.$.chil2.$data.parr.push('add');
+            s.$.chil2.$data.pobj.o  = 'obj-change';
+        }
+    </script>
+</body>
+
+</html>

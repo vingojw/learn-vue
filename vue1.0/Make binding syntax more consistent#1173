@@ -1,0 +1,79 @@
+作出有约束力的语法更加一致
+[https://github.com/yyx990803/vue/issues/1173](https://github.com/yyx990803/vue/issues/1173)
+
+目前，我们有几种类型的绑定在模板中：
+1.  相应式指令，例如：v-style, v-on & v-repeat,它们的属性值被直接计算为在当前组件范围表达式,并且 不能包含 [Mustache 标签](http://cn.vuejs.org/guide/index.html#Mustache_风格绑定)
+
+2. 动态指令、字面指令，例如 v-transition, v-ref & v-el，它们的属性被视为字符串，并可以包含Mustache 标签 - 但是它们并不是总是有效： 只有 v-transition 在包含 Mustache 标签 时有效果，其他两种只有一次效果
+
+3. 普通HTML属性中有 Mustache 标签 时，他们会在内部转换成 v-attr
+
+4. Prop绑定，例如 my-prop="{{abc}}". Props 属性值被视为普通字符串，可以包含Mustache标签, 如果包含了 Mustache标签，那么Prop绑定就是动态的
+
+5. 指令参数属性，比如 transition-mode, track-by, number & debounce
+这些被视为几乎是正常的属性，但只计算一次
+
+问题：
+好了，因为你可能已经注意到了，这令人困惑。
+有许多类型的属性，并且 关于其中表达式没有明确的规则 而且 在何处允许使用Mustache标签
+
+具体来说，prop 语法 可以进行一些改进，最开始在props中加入 Mustache标签，变成动态 的初初衷是为了让一个动态的道具可以看看从普通的HTML属性不同，
+但考虑到正常的属性可以包含Mustache标签以及它仍然不够明确,
+通常用动态props比文字字符串的情况多的多，而且用Mustache标签来表示动态，根本不直观。
+另一个问题是它变得笨拙，当你想通过 字面量表示 数/布尔 的prop的时候，因为没有 在 Mustache标签中，属性值只是一个字符串。
+你必须写成 prop="{{123}}" 或者 prop="{{true}}" 来传递真正的数字和布尔值。
+目前，如果能够转换，vue 会尝试自动的将字面量表示的prop转换成 数字/布尔值。但是这并不一定是我们想要的，如果我们想传入的是一个 数字字符串呢？
+
+建议：
+注意：这里是大的改动，只是进行讨论
+Warning: Big changes, just for discussion.
+
+更新：下面是1.0.0 - alpha.2实施。
+见该提案的新版本在[下面的评论](https://github.com/yyx990803/vue/issues/1173#issuecomment-137473650)。
+
+真的很感谢来自每个人的反馈。
+这里有一个更新的建议
+
+v- directives (flow control & form handling, same as alpha.2)
+
+<!-- flow control -->
+<div v-if="ok">
+<div v-for="item in items">
+<div v-show="hi">
+
+<!-- two-way form binding -->
+<input v-model="abc">
+on- handlers (same as alpha.2):
+
+<input on-keyup:enter="abc">
+<form on-submit="handleSubmit">
+bind- can also be used for component props. So it can be used like this:
+
+<!-- component props -->
+<component
+  literal="hello"
+  bind-dynamic="parentMsg"
+  bind-two-way="@something"
+  bind-one-time="*something">
+</component>
+
+<!-- normal attributes -->
+<img bind-src="...">
+<a bind-href="...">
+
+<!-- class & style are enhanced to accept objects and arrays -->
+<div bind-class="{ ... }"></div>
+<div bind-class="[ ... ]"></div>
+<div bind-style="{ ... }"></div>
+literal directives (add a colon at the end of the directive name to indicate literal):
+
+<!-- literal (with colon) -->
+<a v-link:="/abc/123">
+
+<!-- dynamic (without colon) -->
+<a v-link="'/abc/' + id">
+This also eliminates the need for a custom directive to declare itself as literal or not - it can simply provide an update function. If it is used as a literal directive, the plain string will be passed into the update function; if it is used dynamically, then the value of the expression will be passed in instead (and call update again when it changes).
+
+Note: The reason for choosing colon here is because in practice, the only non-alphabetic and easily-typable chars allowed in attributes names are _, -, . and :, and colon looks the most natural here because := is used as assignment operator in many languages.
+
+

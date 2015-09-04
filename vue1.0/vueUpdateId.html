@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="demo">
+        <ul>
+            <li v-repeat="item in mailList">
+                <span >id:{{item.id}}　    </span>
+                <input type="text" v-model="item.name | changeId item.id">
+                <span>{{item.name}}　     </span>
+                <span>{{item.mail_id}}　　 </span>
+            </li>
+        </ul>
+    </div>
+    <script src="./js/vue.js"></script>
+    <script>
+    var mailList = [{
+        id: 1,
+        name: "abc",
+        mail_id: 1
+    }, {
+        id: 2,
+        name: "2",
+        mail_id: 2
+    }, {
+        id: 1,
+        name: "abc",
+        mail_id: 3
+    }, {
+        id: 1,
+        name: "abc",
+        mail_id: 4
+    }];
+ 
+    Vue.filter('changeId', {
+      // read is optional in this case, it's here
+      // just for demo purposes.
+      read: function (val) {
+        return val
+      },
+      // this will be invoked before writing to
+      // the model.
+      write: function (val, oldVal,id) {
+        this.mailList.forEach(function(a){
+           if(a.id==id){
+            a.name = val;
+           }
+        });
+        return val;
+      }
+    });
+
+    var demo = new Vue({
+        el: '#demo',
+        data: {
+            mailList: mailList
+        }
+    })
+
+
+    
+    </script>
+</body>
+
+</html>
